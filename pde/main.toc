@@ -1,0 +1,11 @@
+\contentsline {section}{\numberline {1}引言}{3}{section.1}%
+\contentsline {section}{\numberline {2}问题描述}{3}{section.2}%
+\contentsline {section}{\numberline {3}方法论}{3}{section.3}%
+\contentsline {section}{\numberline {4}实验结果与分析}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}收敛性分析}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}数值精度评估}{4}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}误差分布}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}相空间轨迹分析}{6}{subsection.4.4}%
+\contentsline {section}{\numberline {5}参数敏感性分析}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}实验结果对比}{7}{subsection.5.1}%
+\contentsline {section}{\numberline {6}结论}{11}{section.6}%

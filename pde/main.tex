@@ -1,0 +1,173 @@
+\documentclass[12pt, a4paper]{ctexart}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{a4paper, scale=0.8}
+\usepackage[hidelinks]{hyperref}
+
+\title{\textbf{课后练习:}\\ \textbf{基于 DeepXDE 的 Lotka-Volterra 动力系统求解与分析报告}}
+\author{刘昭阳 25215133 \\ 中山大学数学学院（珠海）}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本实验基于 DeepXDE 框架，利用物理信息神经网络（PINN）求解了经典的 Lotka-Volterra 捕食者-猎物非线性动力系统。通过构建全连接神经网络，结合周期性特征变换与硬边界约束，并采用 Adam 与 L-BFGS 混合优化策略，成功获得了高精度的数值解。实验结果表明，该模型不仅能精确拟合时域内的种群演化轨迹，还能准确重现相空间中的极限环特征。此外，本报告还系统探究了网络深度、宽度及采样点密度对模型性能的影响。对比实验发现，PINN 的训练对超参数高度敏感，不当的配置（如过浅/过窄的网络或不合理的采样）极易导致模型陷入局部极小值。相比之下，基准配置（6层，64神经元，3000采样点）在此任务中表现出了最佳的鲁棒性与准确性。
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+\section{引言}
+本报告旨在探讨物理信息神经网络（Physics-Informed Neural Networks, PINN）在求解非线性常微分方程（ODE）系统中的应用。研究对象为经典的 Lotka-Volterra 捕食者-猎物模型，该模型广泛用于描述生物种群间的动态演化规律。本文基于 DeepXDE 深度学习框架（PyTorch 后端），构建并训练了 PINN 模型以逼近方程组的数值解，并对其精度、收敛性及对网络架构的敏感性进行了深入分析。
+
+\section{问题描述}
+本实验所求解的 Lotka-Volterra 方程组定义如下：
+\begin{equation}
+\begin{aligned}
+\frac{dx}{dt} &= \frac{1}{ub} \cdot rb \cdot (2.0 \cdot ub \cdot x - 0.04 \cdot ub \cdot x \cdot ub \cdot y) \\
+\frac{dy}{dt} &= \frac{1}{ub} \cdot rb \cdot (0.02 \cdot ub \cdot x \cdot ub \cdot y - 1.06 \cdot ub \cdot y)
+\end{aligned}
+\end{equation}
+式中，$x(t)$ 和 $y(t)$ 分别代表猎物和捕食者的归一化种群数量。为保证数值计算的稳定性，引入缩放参数 $ub=200$ 与 $rb=20$。
+系统的初始条件设定为：
+\begin{equation}
+x(0) = \frac{100}{ub}, \quad y(0) = \frac{15}{ub}
+\end{equation}
+求解的时间域为 $t \in [0, 1]$。
+
+\section{方法论}
+针对上述动力学系统，本文构建了一个全连接神经网络（FNN）作为近似求解器，网络拓扑结构及超参数设置如下：
+\begin{itemize}
+    \item \textbf{网络架构}：采用 $1 \times 64 \times 64 \times 64 \times 64 \times 64 \times 64 \times 2$ 的全连接结构，即包含 6 个隐藏层，每层 64 个神经元。
+    \item \textbf{激活函数}：选用双曲正切函数 (tanh)，以保证函数的光滑性与高阶可导性。
+    \item \textbf{初始化策略}：采用 Glorot normal 初始化方法。
+    \item \textbf{特征工程}：在输入层引入特征变换，包含 $\sin(t)$ 等周期性基函数，以增强网络对系统振荡特性的捕捉能力。
+    \item \textbf{边界约束}：通过硬约束（Hard Constraint）方式强制网络输出满足初始条件 $x(0)$ 和 $y(0)$。
+\end{itemize}
+
+模型训练采用两阶段混合优化策略：
+\begin{enumerate}
+    \item \textbf{全局搜索阶段}：使用 Adam 优化器（学习率 $10^{-3}$）迭代 50,000 次，快速逼近解的全局最优区域。
+    \item \textbf{精细调整阶段}：切换至 L-BFGS 优化器进行二阶优化，以进一步降低残差，提升数值精度。
+\end{enumerate}
+
+\section{实验结果与分析}
+
+\subsection{收敛性分析}
+图 \ref{fig:loss} 展示了训练过程中损失函数（Loss）随迭代次数的变化轨迹。由图可见，训练损失与测试损失均呈现显著的下降趋势，表明模型具备良好的学习能力。Adam 优化器在初期有效地降低了 Loss，而后续引入的 L-BFGS 优化器则成功将 Loss 进一步收敛至 $10^{-2}$ 量级，验证了混合优化策略的有效性。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{loss_history.png}
+    \caption{训练与测试损失随迭代次数的收敛曲线}
+    \label{fig:loss}
+\end{figure}
+
+\subsection{数值精度评估}
+为评估模型性能，我们将 PINN 的预测解与基于 `scipy.integrate.solve\_ivp` 的高精度数值解（作为真值）进行了对比。如图 \ref{fig:result} 所示，神经网络预测的种群演化轨迹（虚线）与真实解（实线）高度重合，表明模型能够精准捕捉系统的非线性动态行为。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{result.png}
+    \caption{PINN 预测解与标准数值解的对比}
+    \label{fig:result}
+\end{figure}
+
+\subsection{误差分布}
+图 \ref{fig:error} 进一步展示了预测解与真实解在各时间点上的绝对误差分布。结果显示，$x(t)$ 和 $y(t)$ 的误差始终维持在极低水平，且未随时间推移出现显著的累积效应，充分验证了该方法的高数值精度与稳定性。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{error_analysis.png}
+    \caption{预测解的绝对误差时域分布}
+    \label{fig:error}
+\end{figure}
+
+\subsection{相空间轨迹分析}
+图 \ref{fig:phase} 展示了捕食者与猎物种群在相平面上的演化轨迹。Lotka-Volterra 系统典型的闭合极限环特征被清晰地重现，这对应于种群数量的周期性波动。预测轨迹与真实轨迹在相空间中的完美重合，证实了模型不仅在时域上拟合良好，更正确地保持了系统的几何动力学特征（辛几何结构），未出现能量耗散或发散现象。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{phase_plane.png}
+    \caption{捕食者-猎物系统的相平面轨迹}
+    \label{fig:phase}
+\end{figure}
+
+\section{参数敏感性分析}
+为系统探究网络架构（深度、宽度）及采样策略对模型性能的影响，本文设计了以下五组对比实验：
+\begin{itemize}
+    \item \textbf{Baseline}：基准配置（6层，64神经元，3000采样点）。
+    \item \textbf{Shallow}：浅层网络（3层，64神经元，3000采样点）。
+    \item \textbf{Narrow}：窄网络（6层，32神经元，3000采样点）。
+    \item \textbf{Sparse}：稀疏采样（基准架构，500采样点）。
+    \item \textbf{Dense}：密集采样（基准架构，6000采样点）。
+\end{itemize}
+
+\subsection{实验结果对比}
+图 \ref{fig:exp_comparison} 直观对比了不同配置下模型预测结果的相对 L2 误差。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_comparison.png}
+    \caption{不同实验配置下的相对 L2 误差对比}
+    \label{fig:exp_comparison}
+\end{figure}
+
+实验结果分析如下：
+\begin{enumerate}
+    \item \textbf{基准模型的鲁棒性}：Baseline 配置在本轮实验中取得了最低的误差（$L2 \approx 10^{-1}$ 量级），且训练 Loss 成功收敛至 $10^{-4}$ 量级。这表明适当的网络深度和宽度对于捕捉该动力系统的复杂性是必要的。
+    \item \textbf{局部极小值陷阱}：Shallow、Narrow、Sparse 和 Dense 配置在本实验中均陷入了较高的 Loss 平台（$\approx 1.6 \times 10^{-2}$），导致预测误差较大（$L2 \approx 0.8$）。这一现象揭示了 PINN 的训练过程对初始化状态和超参数设置具有高度敏感性，极易陷入局部最优解。
+    \item \textbf{网络容量与优化地形}：Shallow 和 Narrow 网络的表现欠佳，提示网络容量（参数量）的不足可能限制了模型的表达能力，或使得损失函数的优化地形（Optimization Landscape）更加崎岖，增加了寻找全局最优解的难度。
+    \item \textbf{采样策略的权衡}：Sparse（500点）和 Dense（6000点）的表现均不如 Baseline（3000点）。过少的采样点导致物理约束信息不足；而过多的采样点在优化资源（迭代次数）有限的情况下，可能增加了优化难度，或导致了过拟合与优化停滞。
+\end{enumerate}
+
+图 \ref{fig:exp_baseline} 与 图 \ref{fig:exp_shallow} 分别展示了 Baseline 和 Shallow 配置下的预测结果。对比可见，Baseline 模型成功拟合了系统的振荡曲线，而 Shallow 模型则未能正确捕捉系统的动态行为。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_Baseline.png}
+    \caption{Baseline 配置下的预测结果}
+    \label{fig:exp_baseline}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_Shallow.png}
+    \caption{Shallow 配置下的预测结果（陷入局部最优）}
+    \label{fig:exp_shallow}
+\end{figure}
+
+此外，图 \ref{fig:exp_narrow}、图 \ref{fig:exp_sparse} 以及 图 \ref{fig:exp_dense} 进一步展示了其他配置下的预测曲线。这些结果再次印证，在非最优的超参数设置下，PINN 极易陷入局部极小值，导致预测轨迹严重偏离真实解。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_Narrow.png}
+    \caption{Narrow 配置下的预测结果}
+    \label{fig:exp_narrow}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_Sparse.png}
+    \caption{Sparse 配置下的预测结果}
+    \label{fig:exp_sparse}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{exp_Dense.png}
+    \caption{Dense 配置下的预测结果}
+    \label{fig:exp_dense}
+\end{figure}
+
+\section{结论}
+本研究基于 DeepXDE 框架和 PyTorch 后端，成功实现了对 Lotka-Volterra 微分方程组的 PINN 求解。通过结合 Adam 和 L-BFGS 混合优化算法，以及合理的网络结构设计，获得了高精度的数值解。综合时域对比、误差分布及相空间轨迹分析，均表明该 PINN 模型具有优异的逼近能力和物理一致性。
+
+进一步的参数敏感性分析揭示了 PINN 训练的复杂性。实验结果表明，网络架构（深度与宽度）和采样策略（样本数量）对模型的收敛性和最终精度有显著影响。在本研究中，基准配置（6层，每层64个神经元，3000个采样点）表现最佳，而其他变体则因陷入局部极小值而表现不佳。综上所述，在实际应用中，细致的超参数调优和稳健的初始化策略对于获得可靠的 PINN 解至关重要。
+
+
+\end{document}

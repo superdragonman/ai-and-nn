@@ -1,0 +1,6 @@
+Experiment, L2_Error_X, L2_Error_Y
+Baseline, 1.9005e-01, 1.2797e-01
+Shallow, 8.8208e-01, 8.6663e-01
+Narrow, 8.8216e-01, 8.6674e-01
+Sparse, 8.8215e-01, 8.6665e-01
+Dense, 8.8211e-01, 8.6661e-01

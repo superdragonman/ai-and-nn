@@ -1,0 +1,17 @@
+Experiment Results
+==================
+Experiment: Baseline
+  Train Loss: 7.614805781486211e-06
+  Test Loss: 1.54198169184383e-05
+  Test Metric (L2 Rel Error): 0.014700274914503098
+------------------------------
+Experiment: Deeper_Net
+  Train Loss: 3.3787582651712e-06
+  Test Loss: 2.6104973585461266e-05
+  Test Metric (L2 Rel Error): 0.021079521626234055
+------------------------------
+Experiment: Sparse_Sampling
+  Train Loss: 3.4116935694328276e-06
+  Test Loss: 1.7505941286799498e-05
+  Test Metric (L2 Rel Error): 0.017023257911205292
+------------------------------
