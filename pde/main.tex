@@ -5,7 +5,7 @@
 \usepackage{float}
 \usepackage{geometry}
 \geometry{a4paper, scale=0.8}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=green]{hyperref}
 
 \title{\textbf{课后练习:}\\ \textbf{基于 DeepXDE 的 Lotka-Volterra 动力系统求解与分析报告}}
 \author{刘昭阳 25215133 \\ 中山大学数学学院（珠海）}
@@ -16,7 +16,7 @@
 \maketitle
 
 \begin{abstract}
-本实验基于 DeepXDE 框架，利用物理信息神经网络（PINN）求解了经典的 Lotka-Volterra 捕食者-猎物非线性动力系统。通过构建全连接神经网络，结合周期性特征变换与硬边界约束，并采用 Adam 与 L-BFGS 混合优化策略，成功获得了高精度的数值解。实验结果表明，该模型不仅能精确拟合时域内的种群演化轨迹，还能准确重现相空间中的极限环特征。此外，本报告还系统探究了网络深度、宽度及采样点密度对模型性能的影响。对比实验发现，PINN 的训练对超参数高度敏感，不当的配置（如过浅/过窄的网络或不合理的采样）极易导致模型陷入局部极小值。相比之下，基准配置（6层，64神经元，3000采样点）在此任务中表现出了最佳的鲁棒性与准确性。
+本实验基于 DeepXDE 框架，利用物理信息神经网络（PINN）求解了经典的 Lotka-Volterra 捕食者-猎物非线性动力系统。通过构建全连接神经网络，结合周期性特征变换与硬边界约束，并采用 Adam 与 L-BFGS 混合优化策略，成功获得了高精度的数值解。实验结果表明，该模型不仅能精确拟合时域内的种群演化轨迹，还能准确重现相空间中的极限环特征。此外，本报告还系统探究了网络深度、宽度及采样点密度对模型性能的影响。对比实验发现，PINN 的训练对超参数高度敏感，不当的配置（如过浅/过窄的网络或不合理的采样）极易导致模型陷入局部极小值。相比之下，基准配置（6层，64神经元，3000采样点）在此任务中表现出了最佳的鲁棒性与准确性。\href{https://github.com/superdragonman/ai-and-nn}{代码仓库}
 \end{abstract}
 \newpage
 \tableofcontents

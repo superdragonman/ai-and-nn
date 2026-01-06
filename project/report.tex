@@ -4,17 +4,16 @@
 \usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{float}
-\usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{subcaption} % 优化排版，支持子图
 \usepackage{listings}
 \usepackage{setspace}
 \usepackage{indentfirst}
 \usepackage{caption}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=green]{hyperref}
 
 % 页面设置
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
-\hypersetup{hidelinks}
 \setstretch{1.2}
 
 % 代码块设置
@@ -28,7 +27,7 @@
 % 简洁页眉页脚
 \pagestyle{plain}
 
-    \title{\textbf{项目作业: \\基于多层感知机的混沌系统与金融时间序列预测及不确定性量化分析}}
+    \title{\textbf{项目作业: \\时间序列预测}}
 \author{刘昭阳25215133 \\ 中山大学数学学院(珠海)}
 \date{\today}
 
@@ -36,7 +35,7 @@
 \maketitle
 
 \begin{abstract}
-本报告详细阐述了利用深度学习技术（特别是多层感知机 MLP）对确定性混沌系统（洛伦兹系统）和随机性金融时间序列（股票价格）进行建模与预测的实验过程。首先，我们通过数值积分生成洛伦兹系统的轨迹数据，并训练 MLP 模型学习其动力学演化规律。随后，我们将相同的方法论迁移至真实的股票价格预测任务中，设计了三种不同的输入特征组合方案，并引入 Deep Ensembles 方法对预测结果的不确定性进行量化。实验结果表明，MLP 能够极高精度地拟合洛伦兹系统的短期演化；而在股票预测中，利用目标股票自身的历史数据进行单变量预测效果最佳。值得注意的是，简单的 Persistence Model 在股票预测任务中击败了复杂的 MLP 模型，有力地支持了有效市场假说。不确定性分析进一步揭示了模型在不同任务下的置信度差异，为金融风险评估提供了重要参考。
+本报告详细阐述了利用深度学习技术（特别是多层感知机 MLP）对确定性混沌系统（洛伦兹系统）和随机性金融时间序列（股票价格）进行建模与预测的实验过程。首先，我们通过数值积分生成洛伦兹系统的轨迹数据，并训练 MLP 模型学习其动力学演化规律。随后，我们将相同的方法论迁移至真实的股票价格预测任务中，设计了三种不同的输入特征组合方案，并引入 Deep Ensembles 方法对预测结果的不确定性进行量化。实验结果表明，MLP 能够极高精度地拟合洛伦兹系统的短期演化；而在股票预测中，利用目标股票自身的历史数据进行单变量预测效果最佳。值得注意的是，简单的 Persistence Model 在股票预测任务中击败了复杂的 MLP 模型，有力地支持了有效市场假说。不确定性分析进一步揭示了模型在不同任务下的置信度差异，为金融风险评估提供了重要参考。\href{https://github.com/superdragonman/ai-and-nn}{代码仓库}
 \end{abstract}
 
 \newpage

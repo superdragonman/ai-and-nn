@@ -6,7 +6,7 @@
 \usepackage{geometry}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=green]{hyperref}
 
 \geometry{a4paper, scale=0.8}
 
@@ -20,6 +20,7 @@
 
 \begin{abstract}
 本报告旨在深入探究 DeepONet 在学习反导数算子任务中的性能表现。我们不仅评估了基准模型的精度，还系统地分析了网络深度（Network Depth）和域内采样密度（Sampling Density）对模型泛化能力的影响。实验结果表明，基准模型在全量数据下表现最佳，测试集相对误差仅为 $1.47\%$。盲目增加网络深度会导致过拟合，而稀疏的域内采样则会显著削弱模型捕捉函数细节的能力。
+\href{https://github.com/superdragonman/ai-and-nn}{代码仓库}
 \end{abstract}
 \newpage
 \tableofcontents
